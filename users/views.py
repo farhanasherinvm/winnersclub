@@ -57,65 +57,65 @@ def generate_next_userid():
         if not CustomUser.objects.filter(user_id=user_id).exists():
             return user_id
 
-# class SendOTPView(APIView):
-#     permission_classes = [AllowAny]
+class SendOTPView(APIView):
+    permission_classes = [AllowAny]
 
-#     def post(self, request, *args, **kwargs):
-#         serializer = SendOTPSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         email = serializer.validated_data["email"].strip().lower()
+    def post(self, request, *args, **kwargs):
+        serializer = SendOTPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"].strip().lower()
 
-#         if CustomUser.objects.filter(email__iexact=email).exists():
-#             return Response({"error": "Email already registered."}, status=status.HTTP_400_BAD_REQUEST)
+        if CustomUser.objects.filter(email__iexact=email).exists():
+            return Response({"error": "Email already registered."}, status=status.HTTP_400_BAD_REQUEST)
 
-#         ev, sent, error, provider_info = create_and_send_otp(email)
+        ev, sent, error, provider_info = create_and_send_otp(email)
 
-#         # provider_info is expected to be a dict from create_and_send_otp
-#         otp_value = None
-#         if isinstance(provider_info, dict):
-#             otp_value = provider_info.get("otp")
+        # provider_info is expected to be a dict from create_and_send_otp
+        otp_value = None
+        if isinstance(provider_info, dict):
+            otp_value = provider_info.get("otp")
 
-#         response = {
-#             "message": "OTP generated successfully." if sent else "OTP generated but sending failed.",
-#             "sent": bool(sent),
-#             "otp": otp_value,  # top-level OTP for Render/DEBUG testing (present only if create_and_send_otp allowed it)
-#             "provider_info": provider_info,
-#         }
+        response = {
+            "message": "OTP generated successfully." if sent else "OTP generated but sending failed.",
+            "sent": bool(sent),
+            "otp": otp_value,  # top-level OTP for Render/DEBUG testing (present only if create_and_send_otp allowed it)
+            "provider_info": provider_info,
+        }
 
-#         if error:
-#             response["error"] = error
+        if error:
+            response["error"] = error
 
-#         return Response(response, status=status.HTTP_200_OK)
+        return Response(response, status=status.HTTP_200_OK)
 
-# class VerifyOTPView(APIView):
-#     permission_classes = [AllowAny]
+class VerifyOTPView(APIView):
+    permission_classes = [AllowAny]
 
-#     def post(self, request, *args, **kwargs):
-#         serializer = VerifyOTPSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         email = serializer.validated_data["email"].strip().lower()
-#         otp = serializer.validated_data["otp"].strip()
+    def post(self, request, *args, **kwargs):
+        serializer = VerifyOTPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"].strip().lower()
+        otp = serializer.validated_data["otp"].strip()
 
-#         ev = EmailVerification.objects.filter(email__iexact=email).order_by("-created_at").first()
-#         if not ev:
-#             return Response({"error": "No OTP request found for this email. Please request OTP first."}, status=status.HTTP_400_BAD_REQUEST)
+        ev = EmailVerification.objects.filter(email__iexact=email).order_by("-created_at").first()
+        if not ev:
+            return Response({"error": "No OTP request found for this email. Please request OTP first."}, status=status.HTTP_400_BAD_REQUEST)
 
-#         if ev.is_expired():
-#             return Response({"error": "OTP expired. Please request a new OTP."}, status=status.HTTP_400_BAD_REQUEST)
+        if ev.is_expired():
+            return Response({"error": "OTP expired. Please request a new OTP."}, status=status.HTTP_400_BAD_REQUEST)
 
-#         max_attempts = int(getattr(settings, "OTP_MAX_ATTEMPTS", 5))
-#         if ev.attempts >= max_attempts:
-#             return Response({"error": "Too many attempts. Please request a new OTP."}, status=status.HTTP_400_BAD_REQUEST)
+        max_attempts = int(getattr(settings, "OTP_MAX_ATTEMPTS", 5))
+        if ev.attempts >= max_attempts:
+            return Response({"error": "Too many attempts. Please request a new OTP."}, status=status.HTTP_400_BAD_REQUEST)
 
-#         # Accept OTP if it matches stored code OR (for Render/DEBUG) if OTP equals provider-returned otp)
-#         if ev.otp_code == otp:
-#             ev.is_verified = True
-#             ev.save(update_fields=["is_verified"])
-#             return Response({"message": "Email verified successfully."}, status=status.HTTP_200_OK)
-#         else:
-#             ev.attempts += 1
-#             ev.save(update_fields=["attempts"])
-#             return Response({"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+        # Accept OTP if it matches stored code OR (for Render/DEBUG) if OTP equals provider-returned otp)
+        if ev.otp_code == otp:
+            ev.is_verified = True
+            ev.save(update_fields=["is_verified"])
+            return Response({"message": "Email verified successfully."}, status=status.HTTP_200_OK)
+        else:
+            ev.attempts += 1
+            ev.save(update_fields=["attempts"])
+            return Response({"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
         
 class RegistrationView(APIView):
     permission_classes = [AllowAny]
