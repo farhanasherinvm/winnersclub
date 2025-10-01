@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-w(pqzj2f%imbkv1c88+m2cdr_tyiwv%9(&v^2jj1zooxp9-1+3
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['127.0.0.1:8000', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['winnersclub-g2dv.onrender.com','127.0.0.1:8000', '127.0.0.1', 'localhost']
 
 # Application definition
 
